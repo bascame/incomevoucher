@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Manajemen Voucher</title>
+
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome (untuk ikon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Link ke file CSS kustom -->
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+
+    <header class="dashboard-header">
+        <h1>Dashboard Manajemen Voucher</h1>
+        <div class="user-info">
+            <span id="user-email"></span>
+            <div class="notification-bell">
+                <i class="fas fa-bell"></i>
+                <span id="notification-badge" class="badge" style="display: none;">0</span>
+                <div id="notification-dropdown" class="notification-dropdown">
+                    <div class="notification-header">
+                        <h3>Notifikasi</h3>
+                    </div>
+                    <ul id="notification-list">
+                        <li class="no-notification">Tidak ada notifikasi baru.</li>
+                    </ul>
+                </div>
+            </div>
+            <button id="logout-button" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+    </header>
+
+    <main class="dashboard-container">
+        <!-- Baris untuk Statistik/Bagan -->
+        <div class="stats-row">
+            <section class="card stats-card">
+                <h2>Status Voucher</h2>
+                <div class="chart-container">
+                    <canvas id="voucher-stats-chart"></canvas>
+                </div>
+            </section>
+            <section class="card stats-card">
+                <h2>5 Voucher Terpopuler</h2>
+                <div class="chart-container">
+                    <canvas id="voucher-usage-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form untuk menambah voucher -->
+        <section class="card form-card">
+            <h2>Tambah Voucher Baru</h2>
+            <form id="add-voucher-form">
+                <div class="form-group">
+                    <label for="voucher-code">Kode Voucher</label>
+                    <input type="text" id="voucher-code" placeholder="Contoh: DISKONAKHIRTAHUN" required>
+                </div>
+                <div class="form-group">
+                    <label for="voucher-discount">Diskon (%)</label>
+                    <input type="number" id="voucher-discount" placeholder="Contoh: 25" required min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="voucher-status">Status</label>
+                    <select id="voucher-status" required>
+                        <option value="aktif">Aktif</option>
+                        <option value="tidak aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="voucher-expires-at">Tanggal Kedaluwarsa (Opsional)</label>
+                    <input type="date" id="voucher-expires-at">
+                </div>
+                <button type="submit" class="submit-btn">Tambah Voucher</button>
+            </form>
+        </section>
+
+        <!-- Admin Actions Card -->
+        <section id="admin-actions-card" class="card" style="display: none;">
+            <h2>Tindakan Admin</h2>
+            <form id="make-admin-form">
+                <p>Jadikan pengguna lain sebagai admin dengan memasukkan email mereka.</p>
+                <div class="form-group">
+                    <label for="admin-email">Email Pengguna</label>
+                    <input type="email" id="admin-email" placeholder="contoh@email.com" required>
+                </div>
+                <button type="submit" class="submit-btn">Jadikan Admin</button>
+            </form>
+            <div id="admin-notification" class="notification" style="display:none;"></div>
+        </section>
+
+        <!-- Import CSV Card -->
+        <section id="import-csv-card" class="card" style="display: none;">
+            <h2>Impor dari CSV</h2>
+            <form id="import-csv-form">
+                <p>Unggah file CSV untuk menambahkan banyak voucher sekaligus. Pastikan header file adalah: <code>code,discount,status,expiresAt</code>.</p>
+                <div class="form-group">
+                    <label for="csv-file">Pilih File CSV</label>
+                    <input type="file" id="csv-file" accept=".csv" required>
+                </div>
+                <button type="submit" class="submit-btn import-btn">Impor Data</button>
+            </form>
+            <div id="import-status" style="margin-top: 15px;"></div>
+        </section>
+
+        <!-- Tabel untuk menampilkan voucher -->
+        <section class="card list-card">
+            <div class="card-header">
+                <h2>Daftar Voucher</h2>
+                <button id="export-csv-btn" class="export-btn">
+                    <i class="fas fa-file-csv"></i> Export ke CSV
+                </button>
+                <button id="export-pdf-btn" class="export-btn pdf-btn">
+                    <i class="fas fa-file-pdf"></i> Cetak ke PDF
+                </button>
+            </div>
+            <div class="filter-controls">
+                <div class="view-options">
+                    <label><input type="checkbox" id="show-archived-checkbox"> Tampilkan Arsip</label>
+                </div>
+            </div>
+            <div class="date-range-filter">
+                <label for="start-date">Dari:</label>
+                <input type="date" id="start-date">
+
+                <label for="end-date">Sampai:</label>
+                <input type="date" id="end-date">
+                <button id="filter-date-btn" class="submit-btn">Filter</button>
+            </div>
+            <div class="search-container">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Cari berdasarkan kode voucher...">
+            </div>
+            <div class="table-container">
+                <table id="voucher-table">
+                    <thead>
+                        <tr>
+                            <th data-sort="code">Kode Voucher <i class="sort-icon fas fa-sort"></i></th>
+                            <th data-sort="discount">Diskon (%) <i class="sort-icon fas fa-sort"></i></th>
+                            <th data-sort="status">Status <i class="sort-icon fas fa-sort"></i></th>
+                            <th style="width: 280px;">Aksi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="voucher-list">
+                        <!-- Data voucher akan dimuat di sini oleh JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="pagination-container">
+                <button id="prev-page" class="pagination-btn" disabled>
+                    <i class="fas fa-chevron-left"></i> Sebelumnya
+                </button>
+                <span id="page-info">Halaman 1</span>
+                <button id="next-page" class="pagination-btn">
+                    Selanjutnya <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal untuk Edit Voucher -->
+    <div id="edit-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button">&times;</span>
+            <h2>Edit Voucher</h2>
+            <form id="edit-voucher-form">
+                <input type="hidden" id="edit-voucher-id">
+                <div class="form-group">
+                    <label for="edit-voucher-code">Kode Voucher</label>
+                    <input type="text" id="edit-voucher-code" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-voucher-discount">Diskon (%)</label>
+                    <input type="number" id="edit-voucher-discount" required min="1" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="edit-voucher-status">Status</label>
+                    <select id="edit-voucher-status" required>
+                        <option value="aktif">Aktif</option>
+                        <option value="tidak aktif">Tidak Aktif</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="edit-voucher-expires-at">Tanggal Kedaluwarsa</label>
+                    <input type="date" id="edit-voucher-expires-at">
+                </div>
+                <button type="submit" class="submit-btn">Simpan Perubahan</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal untuk Log Audit -->
+    <div id="audit-log-modal" class="modal">
+        <div class="modal-content">
+            <span class="close-button" onclick="document.getElementById('audit-log-modal').style.display='none'">&times;</span>
+            <h2 id="audit-log-title">Riwayat Perubahan Voucher</h2>
+            <ul id="audit-log-list" class="audit-log">
+                <!-- Log akan dimuat di sini -->
+            </ul>
+        </div>
+    </div>
+
+    <!-- jsPDF and jsPDF-AutoTable CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+
+    <!-- PapaParse CDN for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Firebase SDKs (sudah ada di index.html, tapi lebih baik dideklarasikan lagi untuk halaman mandiri) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-functions-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    <script src="dashboard.js"></script>
+</body>
+</html>

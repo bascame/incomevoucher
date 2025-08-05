@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Manajemen Voucher</title>
+    
+    <!-- Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome (untuk ikon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Link ke file CSS kustom -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <main class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Manajemen Penjualan Voucher</h1>
+                <p>Silakan masuk untuk melanjutkan</p>
+            </div>
+
+            <!-- Placeholder untuk notifikasi -->
+            <div id="notification" style="display:none;"></div>
+
+            <form id="login-form">
+                <div class="input-group">
+                    <i class="fas fa-user"></i>
+                    <input type="email" id="username" name="username" placeholder="Username atau Email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Password" required>
+                </div>
+
+                <div class="options">
+                    <label for="remember-me"><input type="checkbox" id="remember-me"> Ingat saya</label>
+                    <a href="#" id="forgot-password-link">Lupa Password?</a>
+                </div>
+
+                <button type="submit" class="login-button">Login</button>
+
+                <p class="signup-link">Belum punya akun? <a href="signup.html">Daftar di sini</a></p>
+            </form>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script> 
+    <script src="firebase-config.js"></script>
+    <!-- Pastikan path ke script login Anda benar -->
+    <script src="../web12/script.js"></script> 
+</body>
+</html>

@@ -1,0 +1,53 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Aturan untuk koleksi 'users'
+    match /users/{userId} {
+      // Pengguna hanya bisa membaca data mereka sendiri.
+      allow read: if request.auth.uid == userId;
+      // Pembuatan terjadi saat pendaftaran. Pengguna tidak bisa mengubah perannya sendiri.
+      allow write: if false;
+    }
+
+    // Aturan untuk koleksi 'vouchers'
+    match /vouchers/{voucherId} {
+      // Semua pengguna yang terautentikasi (admin dan staf) bisa membaca voucher.
+      allow read: if request.auth != null;
+
+      // Hanya admin yang bisa membuat voucher baru, dengan data yang valid.
+      allow create: if request.auth != null
+                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+                    && isValidVoucherData(request.resource.data);
+
+      // Hanya admin yang bisa memperbarui voucher, dengan data yang valid.
+      allow update: if request.auth != null
+                    && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin'
+                    && isUpdatableVoucherData(request.resource.data, resource.data);
+
+      // Penghapusan (hard delete) tidak diizinkan untuk menjaga integritas log. Gunakan soft delete (isArchived).
+      allow delete: if false;
+    }
+
+    // Fungsi validasi untuk data voucher baru (saat create)
+    function isValidVoucherData(data) {
+      return data.code is string && data.code.size() > 0 && data.code.size() < 50
+          && data.discount is number && data.discount >= 1 && data.discount <= 100
+          && data.status is string && (data.status == 'aktif' || data.status == 'tidak aktif')
+          && data.usageCount == 0
+          && data.isArchived == false
+          && data.lastUpdatedBy == request.auth.uid
+          && data.createdAt == request.time
+          && (!('expiresAt' in data) || data.expiresAt is timestamp);
+    }
+
+    // Fungsi validasi untuk pembaruan data voucher
+    function isUpdatableVoucherData(newData, oldData) {
+      return newData.code is string && newData.code.size() > 0 && newData.code.size() < 50
+          && newData.discount is number && newData.discount >= 1 && newData.discount <= 100
+          && newData.status is string && (newData.status == 'aktif' || newData.status == 'tidak aktif')
+          && newData.lastUpdatedBy == request.auth.uid
+          && newData.createdAt == oldData.createdAt; // createdAt tidak boleh diubah
+    }
+  }
+}

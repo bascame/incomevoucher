@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daftar - Manajemen Voucher</title>
+    
+    <!-- Menggunakan CSS yang sama dengan halaman login untuk konsistensi -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Font Awesome (untuk ikon) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+
+    <main class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <h1>Buat Akun Baru</h1>
+                <p>Isi form di bawah untuk mendaftar</p>
+            </div>
+
+            <!-- Placeholder untuk notifikasi -->
+            <div id="notification" style="display:none;"></div>
+
+            <form id="signup-form">
+                <div class="input-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" id="email" name="email" placeholder="Alamat Email" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="password" name="password" placeholder="Password (min. 6 karakter)" required>
+                </div>
+
+                <div class="input-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Konfirmasi Password" required>
+                </div>
+
+                <button type="submit" class="login-button">Daftar</button>
+
+                <p class="signup-link">Sudah punya akun? <a href="index.html">Login di sini</a></p>
+            </form>
+        </div>
+    </main>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <!-- Menggunakan file konfigurasi terpusat -->
+    <script src="firebase-config.js"></script>
+    <script src="signup.js"></script>
+</body>
+</html>
